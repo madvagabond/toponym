@@ -1,4 +1,4 @@
 (library
  (public_name toponym)
  (name toponym)
- (libraries cstruct ipaddr))
+ (libraries cstruct ipaddr fpath))

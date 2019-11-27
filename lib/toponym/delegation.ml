@@ -1,64 +1,44 @@
-type path = string list 
-
-type delegation = {src: path; dest: path}
+type path = Fpath.path
 
 
-
-
-
-let has_prefix prefix path =
-
-
-  let rec aux prefix path =
-    match prefix, path with
-    | pfx_hd :: pfx_tl, hd :: tl when pfx_hd = hd ->
-      aux pfx_tl tl
-
-    | [], _ -> true
-
-    | _ -> false
-  in
-
-  if List.length path < List.length prefix then
-    false
-  else aux prefix path
+type entry = {src: path; dest: path}
 
 
 
-let strip_prefix prefix path = 
-
-  let rec get_suffix l i =
-    if i >= List.length path then
-      l
-    else
-      let e = List.nth path i in
-      get_suffix (l @ [e]) (i + 1)          
-  in
-  
-
-  
-    if has_prefix prefix path then
-      let start = List.length prefix in
-      Some (get_suffix [] start )
-    else
-
-      None 
-   
 
 
 
-let apply_delegation delegation path =
-  match (strip_prefix delegation.src path) with
-  | Some suffix -> Some(
-      delegation.dest @ suffix
-    )
-
-
-  | None -> None
 
 
 
-  
+
+let apply rule path =
+  match Fpath.rem_prefix path rule.src  with
+  | Some suffix ->  Fpath.append suffix rule.dest
+  | None -> path
+
+
+
+let make src dest = {src;dest}
+
+
+
+let from_strings src dest =
+  let src, dest = Fpath.v src, Fpath.v dest in
+  {src; dest}
+
+
+let (=>) = from_strings
+
+let (>>) = make
+
+
+
+
+
+
+
+
 
 
 
@@ -67,7 +47,7 @@ let apply_delegation delegation path =
 module Dtab = struct
 
 
-  type t = {entries: delegation list}
+  type t = {entries: entry list}
 
 
 
@@ -80,7 +60,7 @@ module Dtab = struct
 
   
   let lookup t path =
-    List.filter (fun x -> has_prefix x.src path) t.entries
+    List.filter (fun x -> Fpath.is_prefix x.src path) t.entries
 
 
 
@@ -105,6 +85,7 @@ module Dtab = struct
   let join l r =
     {entries = r.entries @ l.entries}
 
+  
 
   
   
