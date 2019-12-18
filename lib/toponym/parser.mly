@@ -1,4 +1,0 @@
-%token SLASH "/"
-%token REWRITE "=>"
-
-

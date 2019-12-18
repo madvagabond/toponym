@@ -6,12 +6,6 @@ type entry = {src: path; dest: path}
 
 
 
-
-
-
-
-
-
 let apply rule path =
   match Fpath.rem_prefix path rule.src  with
   | Some suffix ->  Fpath.append suffix rule.dest
@@ -28,9 +22,6 @@ let from_strings src dest =
   {src; dest}
 
 
-let (=>) = from_strings
-
-let (>>) = make
 
 
 
@@ -38,7 +29,10 @@ let (>>) = make
 
 
 
-
+module Infix = struct
+  let (=>) = from_strings
+  let (>>) = make
+end 
 
 
 
@@ -49,6 +43,36 @@ module Dtab = struct
 
   type t = {entries: entry list}
 
+  
+
+
+
+  
+  let parse s =
+    let open Infix in 
+
+    let read_entry s =
+      Astring.String.find_sub s ~sub:"=>" |> function
+      | Some i ->
+        let prefix = Astring.String.with_range s ~len:(i - 1) in
+        let dest = Astring.String.with_range s ~first:(i + 2) in
+        Some (prefix => dest)
+
+
+      | None -> None
+    in
+
+
+    let fields = Astring.String.fields ~is_sep:(fun c -> c = '\n' || c = ',') s in
+
+
+    let aux acc x =
+      read_entry x |> function
+      | Some e -> e :: acc
+      | None  -> acc
+    in
+
+    List.fold_left aux [] fields
 
 
 

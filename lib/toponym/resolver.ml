@@ -3,7 +3,9 @@
 
 type address = Ipaddr.t * int
 
-type path = Fpath.t 
+type path = Fpath.t
+              
+
 type endpoints = Pending | Bound of address list | Neg
 
 
@@ -11,9 +13,12 @@ type endpoints = Pending | Bound of address list | Neg
 module type S = sig
   type +'a stream
 
+
+  type t 
+  
   type resolver = {
     scheme: string;
-    resolve_fn: string list -> endpoints stream 
+    bind: path -> endpoints stream 
   }
 
 
@@ -25,6 +30,8 @@ module type S = sig
   val scheme: resolver -> string
   
   val resolve: resolver -> Fpath.t -> endpoints stream
+
+
   
 end
 
